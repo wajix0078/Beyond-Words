@@ -11,14 +11,26 @@ import {
     View,
     ImageBackground,
 } from 'react-native';
+import { connect } from 'react-redux';
 import { TransparentButton } from '../shared';
 import api from '../../api';
 import Wrapper from './Wrapper';
 import { Icon } from 'native-base';
+import { getAppConfig } from '../../lib/appConfig';
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
-export default class History extends Component {
+mapStateToProps = (state) => {
+    const { auth } = state;
+    return { auth }
+}
+
+mapDispatchToProps = (dispatch) => {
+    return {
+        onSignIn: (user) => { dispatch(signIn(user)) }
+    }
+}
+class History extends Component {
 
     constructor(props) {
         super(props);
@@ -48,6 +60,7 @@ export default class History extends Component {
             isLoading,
             historyList,
         } = this.state;
+        const styles = createStyles();
 
         return (
             <Wrapper isLoading={isLoading} contentContainerStyle={styles.outerContainer}>
@@ -73,6 +86,7 @@ export default class History extends Component {
         );
     }
     categoryImages = ({ item }) => {
+        const styles = createStyles();
         return (
             <>
                 <View style={styles.item}>
@@ -84,7 +98,11 @@ export default class History extends Component {
     }
 }
 
-const styles = StyleSheet.create({
+export default connect(mapStateToProps, mapDispatchToProps)(History);
+const createStyles = () => {
+    let config = getAppConfig()
+    let { appFontFamily, appFontSize, appImageSize, appLanguage, appPrimaryColor, appSecondaryColor } = config
+    return StyleSheet.create({
     flex1: { flex: 1 },
     buttonsContainer: {
         flexDirection: 'row',
@@ -95,14 +113,14 @@ const styles = StyleSheet.create({
     },
     outerContainer: {
         flex: 1,
-        backgroundColor: '#ECB184'
+        backgroundColor: appSecondaryColor
     },
     container: {
         justifyContent: 'space-evenly',
         borderRadius: 25,
         borderWidth: 0,
         marginTop: 20,
-        backgroundColor: '#5D4242',
+        backgroundColor: appPrimaryColor,
         marginHorizontal: 20,
         padding: 25,
     },
@@ -111,14 +129,15 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
         padding: 5,
         borderWidth: 3 / 2,
-        borderColor: '#5D4242',
+        borderColor: appPrimaryColor,
         borderRadius: 5,
         justifyContent: 'center',
     },
     headertext: {
-        color: '#ECB184',
+        color: appSecondaryColor,
         fontWeight: 'bold',
-        fontSize: 40,
+        fontSize: 40*appFontSize,
+        fontFamily: appFontFamily,
         textAlign: 'center',
     },
     flatListContainer: {
@@ -127,7 +146,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomLeftRadius: 25,
         borderBottomRightRadius: 25,
-        borderColor: '#5D4242',
+        borderColor: appPrimaryColor,
         borderWidth: 3 / 2,
         marginTop: -6,
         marginHorizontal: 30,
@@ -136,14 +155,17 @@ const styles = StyleSheet.create({
     flatList: {
     },
     flatlistContentContainer: {
+        paddingBottom: 25
     },
     date: {
-        color: '#5D4242',
-        fontSize: 8,
+        color: appPrimaryColor,
+        fontSize: 8*appFontSize,
+        fontFamily: appFontFamily,
         fontWeight: 'bold',
     },
     sentence: {
-        color: '#5D4242',
+        color: appPrimaryColor,
         fontWeight: 'bold',
     },
-});
+})}
+;

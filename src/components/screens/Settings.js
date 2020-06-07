@@ -19,28 +19,48 @@ import {
     Picker
 } from "native-base";
 import Wrapper from "./Wrapper";
+import { connect } from 'react-redux';
 import api from "../../api";
+import { getAppConfig, setAppConfig } from "../../lib/appConfig"
+import { colorSet } from "../../styles/colors";
+import {t} from 'i18n-js'
 // import { scaleSize } from './mixins';
 // import { appFontScale } from './appFontScale';
 // import { appColors } from './colors';
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
 
-const colors = ['#FADAFF', '#ECB184', '#FFFFFF'];
+// const colors = ['#FADAFF', '#ECB184', '#FFFFFF'];
+var fonts = ['sans-serif-thin', 'serif', 'Roboto', 'monospace']
 
-export default class BeyondWords extends Component {
+var colors = [];
+for (let [key, value] of Object.entries(colorSet)) {
+    colors.push(value.secondaryColor)
+}
+
+mapStateToProps = (state) => {
+    const { auth } = state;
+    return { auth }
+}
+
+mapDispatchToProps = (dispatch) => {
+    return {
+        onSignIn: (user) => { dispatch(signIn(user)) }
+    }
+}
+class BeyondWords extends Component {
     constructor(props) {
         super(props);
         this.state = {
             isLoading: false,
             profile: {
-                sound: true,
-                pictureSize: "Small",
-                fontSize: "Small",
+                // sound: true,
+                pictureSize: 1,
+                fontSize: 1,
                 language: "EN",
-                fontType: "Small",
-                symbolSetType: "colored",
-                backgroundColor: "#ECB184",
+                fontType: fonts[0],
+                // symbolSetType: "colored",
+                backgroundColor: colorSet.col1.secondaryColor,
             }
         };
     }
@@ -49,31 +69,64 @@ export default class BeyondWords extends Component {
     }
     getUserProfile = () => {
         try {
-            this.setState({ isLoading: true })
-            let userId = api.currentUser.uid;
-            api.getUserById(userId)
-                .then(res => {
-                    if (res) {
-                        const { sound, pictureSize, fontSize, language, fontType, symbolSetType, backgroundColor } = res
-                        this.setState({
-                            isLoading: false,
-                            profile: { sound, pictureSize, fontSize, language, fontType, symbolSetType, backgroundColor }
-                        })
-                    }
-                })
+            let config = getAppConfig()
+            console.log(config)
+            this.setState({
+                profile:
+                {
+                    ...this.state.profile,
+                    pictureSize: config.appImageSize,
+                    fontSize: config.appFontSize,
+                    language: config.appLanguage,
+                    fontType: config.appFontFamily,
+                    backgroundColor: config.appSecondaryColor,
+                }
+            })
+            // this.setState({ isLoading: true })
+            // let userId = api.currentUser.uid;
+            // api.getUserById(userId)
+            //     .then(res => {
+            //         if (res) {
+            //             const { sound, pictureSize, fontSize, language, fontType, symbolSetType, backgroundColor } = res
+            //             this.setState({
+            //                 isLoading: false,
+            //                 profile: { sound, pictureSize, fontSize, language, fontType, symbolSetType, backgroundColor }
+            //             })
+            //         }
+            //     })
         } catch (error) {
+            this.setState({ isLoading: false })
             console.log(error);
         }
     }
-    handleSubmit = () => {
+    updateLocalConfig = async () => {
+        const { fontSize, fontType, pictureSize, backgroundColor, language } = this.state.profile;
+        console.log('this.state.profile:', this.state.profile)
+        let newConfig = {
+            appFontSize: fontSize,
+            appFontFamily: fontType,
+            appPrimaryColor: backgroundColor == colorSet.col1.secondaryColor ?
+                colorSet.col1.primaryColor :
+                backgroundColor == colorSet.col2.secondaryColor ?
+                    colorSet.col2.primaryColor : colorSet.col3.primaryColor,
+            appSecondaryColor: backgroundColor,
+            appImageSize: pictureSize,
+            appLanguage: language
+            // appImageSize: pictureSize == 'Small' ? 0.5 : pictureSize == 'Large' ? 1.5 : 1,
+        }
+        await setAppConfig(newConfig)
+        return true;
+    }
+    handleSubmit = async () => {
         try {
             this.setState({ isLoading: true })
-            const { profile } = this.state
-            let userId = api.currentUser.uid;
-            api.updateUserById(userId, profile)
-                .then(res => {
-                    this.setState({ isLoading: false })
-                })
+            await this.updateLocalConfig()
+            // const { profile } = this.state;
+            // let userId = api.currentUser.uid;
+            // api.updateUserById(userId, profile)
+            //     .then(res => {
+            this.setState({ isLoading: false })
+            //     })
         } catch (error) {
             this.setState({ isLoading: false })
             console.log(error);
@@ -87,21 +140,22 @@ export default class BeyondWords extends Component {
     render() {
         const { isLoading, profile } = this.state;
         const { sound, pictureSize, fontSize, language, fontType, symbolSetType, backgroundColor } = profile
-
+        const styles = createStyles();
         return (
             <Wrapper isLoading={isLoading} contentContainerStyle={styles.fullscreen}>
                 <TouchableOpacity onPress={this.handleBackpress} style={styles.backIconContainer}>
                     <Icon style={styles.backIcon} name='md-arrow-back' type='Ionicons' />
                 </TouchableOpacity>
-                <View style={styles.header}>
-                    <Text style={styles.xLarge}>SETTING</Text>
+                <View style={[styles.header]}>
+                    <Text style={[styles.xLarge]}>{t('setting')}</Text>
+                    {/* <Text style={[styles.xLarge]}>{SETTING}</Text> */}
                 </View>
 
                 {/* .............................................................. */}
 
                 <View style={styles.bodystyle}>
                     <View style={styles.innerbodystyle}>
-                        <View style={styles.settings}>
+                        {/* <View style={styles.settings}>
                             <View style={styles.labelContainer}>
                                 <Text style={styles.settingstext}>SOUND</Text>
                             </View>
@@ -112,11 +166,11 @@ export default class BeyondWords extends Component {
                                     name={sound ? "volume-high" : "volume-off"}
                                 />
                             </TouchableOpacity>
-                        </View>
+                        </View> */}
 
                         <View style={styles.settings}>
                             <View style={styles.labelContainer}>
-                                <Text style={styles.settingstext}>PICTURE SIZE</Text>
+                                <Text style={styles.settingstext}>{t('picture_size')}</Text>
                             </View>
                             <View style={styles.pickerContainer}>
                                 <Picker
@@ -125,16 +179,16 @@ export default class BeyondWords extends Component {
                                     selectedValue={pictureSize}
                                     onValueChange={this.onValueChange('pictureSize')}
                                 >
-                                    <Picker.Item label="Small" value="Small" />
-                                    <Picker.Item label="Medium" value="Medium" />
-                                    <Picker.Item label="Large" value="Large" />
+                                    <Picker.Item label={t('P_small')} value={0.5} />
+                                    <Picker.Item label={t('P_medium')}  value={1} />
+                                    <Picker.Item label={t('P_large')}  value={1.5} />
                                 </Picker>
                             </View>
                         </View>
 
                         <View style={styles.settings}>
                             <View style={styles.labelContainer}>
-                                <Text style={styles.settingstext}>FONT SIZE</Text>
+                                <Text style={styles.settingstext}>{t('f_size')}</Text>
                             </View>
                             <View style={styles.pickerContainer}>
                                 <Picker
@@ -143,16 +197,16 @@ export default class BeyondWords extends Component {
                                     selectedValue={fontSize}
                                     onValueChange={this.onValueChange('fontSize')}
                                 >
-                                    <Picker.Item label="Small" value="Small" />
-                                    <Picker.Item label="Medium" value="Medium" />
-                                    <Picker.Item label="Large" value="Large" />
+                                    <Picker.Item label={t('F_small')}  value={0.8} />
+                                    <Picker.Item label={t('F_medium')}  value={1} />
+                                    <Picker.Item label={t('F_large')}  value={1.2} />
                                 </Picker>
                             </View>
                         </View>
 
                         <View style={styles.settings}>
                             <View style={styles.labelContainer}>
-                                <Text style={styles.settingstext}>LANGUAGE</Text>
+                                <Text style={styles.settingstext}>{t("lang")}</Text>
                             </View>
                             <View style={styles.pickerContainer}>
                                 <Picker
@@ -161,15 +215,15 @@ export default class BeyondWords extends Component {
                                     selectedValue={language}
                                     onValueChange={this.onValueChange('language')}
                                 >
-                                    <Picker.Item label="English" value="EN" />
-                                    <Picker.Item label="URDU" value="UR" />
+                                    <Picker.Item label={t('eng')}  value="EN" />
+                                    <Picker.Item label={t('urdu')}  value="UR" />
                                 </Picker>
                             </View>
                         </View>
 
                         <View style={styles.settings}>
                             <View style={styles.labelContainer}>
-                                <Text style={styles.settingstext}>FONT TYPE</Text>
+                                <Text style={styles.settingstext}>{t("f_type")}</Text>
                             </View>
                             <View style={styles.pickerContainer}>
                                 <Picker
@@ -178,14 +232,17 @@ export default class BeyondWords extends Component {
                                     selectedValue={fontType}
                                     onValueChange={this.onValueChange('fontType')}
                                 >
-                                    <Picker.Item label="Small" value="Small" />
+                                    {
+                                        fonts.map(val => <Picker.Item label={val} value={val} />)
+                                    }
+                                    {/* <Picker.Item label="Small" value="Small" />
                                     <Picker.Item label="Medium" value="Medium" />
-                                    <Picker.Item label="Large" value="Large" />
+                                    <Picker.Item label="Large" value="Large" /> */}
                                 </Picker>
                             </View>
                         </View>
 
-                        <View style={styles.settings}>
+                        {/* <View style={styles.settings}>
                             <View style={styles.labelContainer}>
                                 <Text style={styles.settingstext}>SYMBOL SET TYPE</Text>
                             </View>
@@ -200,16 +257,18 @@ export default class BeyondWords extends Component {
                                     <Picker.Item label="Black & White" value="bw" />
                                 </Picker>
                             </View>
-                        </View>
+                        </View> */}
                     </View>
                     <View style={styles.backgroundcolor}>
                         <View style={styles.labelContainer}>
-                            <Text style={styles.settingstext}>BACKGROUND</Text>
+                            <Text style={styles.settingstext}>{t("BACKGROUND")}</Text>
                         </View>
 
                         <View style={styles.buttons}>
                             {
-                                colors.filter(v => this.props.color ? (v !== this.props.color) : (v !== '#ECB184'))
+                                colors
+                                    // .filter(v => v !== backgroundColor)
+                                    // .filter(v => this.props.color ? (v !== this.props.color) : (v !== '#ECB184'))
                                     .map(val => {
                                         return (
                                             <TouchableOpacity
@@ -227,7 +286,7 @@ export default class BeyondWords extends Component {
                     </View>
 
                     <TouchableOpacity onPress={this.handleSubmit} style={styles.footer}>
-                        <Text style={styles.savetext}>SAVE CHANGES</Text>
+                        <Text style={styles.savetext}>{t("save_changes")}</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -236,158 +295,174 @@ export default class BeyondWords extends Component {
         );
     }
 }
-const styles = StyleSheet.create({
-    backIconContainer: {
-        marginTop: 25,
-        marginLeft: 25,
-        width: 50,
-        height: 30,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2,
-        borderColor: '#5D4242',
-        borderRadius: 15,
-    },
-    backIcon: {
-    },
-    fullscreen: {
-        paddingRight: 0,
-        backgroundColor: "#ECB184",
-        height: height,
-        width: width
-    },
-    lefticon: {
-        width: 40,
-        marginTop: 7,
-        marginLeft: 7,
-        paddingHorizontal: 3,
-        borderRadius: 50,
-        borderWidth: 1
-    },
-    header: {
-        backgroundColor: "#5D4242",
-        paddingHorizontal: 35,
-        padding: 20,
-        borderRadius: 50,
-        alignSelf: "center",
-        marginTop: 10
-    },
+export default connect(mapStateToProps, mapDispatchToProps)(BeyondWords);
+const createStyles = () => {
+    let config = getAppConfig()
+    let { appFontFamily, appFontSize, appImageSize, appLanguage, appPrimaryColor, appSecondaryColor } = config
+    return StyleSheet.create({
+        backIconContainer: {
+            marginTop: 25,
+            marginLeft: 25,
+            width: 50,
+            height: 30,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 2,
+            borderColor: appPrimaryColor,
+            borderRadius: 15,
+        },
+        backIcon: {
+        },
+        fullscreen: {
+            paddingRight: 0,
+            backgroundColor: appSecondaryColor,
+            height: height,
+            width: width
+        },
+        lefticon: {
+            width: 40,
+            marginTop: 7,
+            marginLeft: 7,
+            paddingHorizontal: 3,
+            borderRadius: 50,
+            borderWidth: 1
+        },
+        header: {
+            backgroundColor: appPrimaryColor,
+            paddingHorizontal: 35,
+            padding: 20,
+            borderRadius: 50,
+            alignSelf: "center",
+            marginTop: 10
+        },
 
-    textSmall: {
-        fontSize: 11
-    },
-    textBold: {
-        fontSize: 15,
-        fontWeight: "bold"
-    },
-    textMedium: {
-        fontSize: 15,
-        color: "grey"
-    },
-    textLarge: {
-        fontFamily: "normal",
-        fontSize: 30,
-        fontWeight: "bold"
-    },
-    xLarge: {
-        fontSize: 45,
-        fontWeight: "bold",
-        justifyContent: "center",
-        alignSelf: "center",
-        color: "#ECB184"
-    },
+        textSmall: {
+            fontSize: 11 * appFontSize,
+            fontFamily: appFontFamily,
+        },
+        textBold: {
+            fontSize: 15 * appFontSize,
+            fontFamily: appFontFamily,
+            fontWeight: "bold"
+        },
+        textMedium: {
+            fontSize: 15 * appFontSize,
+            fontFamily: appFontFamily,
+            color: "grey"
+        },
+        textLarge: {
+            fontFamily: appFontFamily,
+            fontSize: 30 * appFontSize,
+            fontWeight: "bold"
+        },
+        xLarge: {
+            fontSize: 45 * appFontSize,
+            fontWeight: "bold",
+            justifyContent: "center",
+            fontFamily: appFontFamily,
+            alignSelf: "center",
+            color: appSecondaryColor
+            // color: appSecondaryColor
+        },
 
-    // .............................................
+        // .............................................
 
-    bodystyle: {
-        flex: 1,
-        marginRight: 2
-    },
-    innerbodystyle: {
-        paddingHorizontal: 20,
-        paddingRight: 50,
-        marginTop: 10,
-        flexDirection: "column"
-    },
-    settings: {
-        marginTop: 15,
-        marginBottom: 15,
-        flexDirection: "row",
-        justifyContent: "space-between"
-    },
-    labelContainer: {
-        backgroundColor: '#5D4242',
-        borderRadius: 20,
-        justifyContent: 'center'
-    },
-    settingstext: {
-        alignSelf: "center",
-        paddingHorizontal: 10,
-        // backgroundColor: "#5D4242",
-        color: '#ECB184',
-        padding: 3,
-        borderRadius: 10,
-        fontWeight: "bold"
-    },
-    pickerContainer: {
-        width: 125,
-        borderColor: '#5D4242',
-        borderRadius: 20,
-        borderWidth: 2,
-        height: 30,
-        justifyContent: 'center'
-    },
-    pickerText: {
-        color: '#5D4242',
-    },
-    caret: {
-        marginLeft: 0,
-        fontSize: 14,
-        color: '#5D4242'
-    },
-    isActive: {
-        borderColor: '#5D4242',
-        borderRadius: 20,
-        borderWidth: 2,
-    },
+        bodystyle: {
+            flex: 1,
+            marginRight: 2
+        },
+        innerbodystyle: {
+            paddingHorizontal: 20,
+            paddingRight: 50,
+            marginTop: 10,
+            flexDirection: "column"
+        },
+        settings: {
+            marginTop: 15,
+            marginBottom: 15,
+            flexDirection: "row",
+            justifyContent: "space-between"
+        },
+        labelContainer: {
+            backgroundColor: appPrimaryColor,
+            borderRadius: 20,
+            justifyContent: 'center'
+        },
+        settingstext: {
+            alignSelf: "center",
+            paddingHorizontal: 10,
+            // backgroundColor: "#5D4242",
+            color: appSecondaryColor,
+            padding: 3,
+            borderRadius: 10,
+            fontWeight: "bold",
+            fontSize: 12 * appFontSize,
+            fontFamily: appFontFamily,
+        },
+        pickerContainer: {
+            width: 125,
+            borderColor: appPrimaryColor,
+            borderRadius: 20,
+            borderWidth: 2,
+            height: 30,
+            justifyContent: 'center'
+        },
+        pickerText: {
+            color: appPrimaryColor,
+        },
+        caret: {
+            marginLeft: 0,
+            fontSize: 14,
+            fontFamily: appFontFamily,
+            color: appPrimaryColor
+        },
+        isActive: {
+            borderColor: appPrimaryColor,
+            borderRadius: 20,
+            borderWidth: 2,
+        },
 
-    // ...........................................
+        // ...........................................
 
-    backgroundcolor: {
-        marginTop: 10,
-        paddingLeft: 20,
-        flexDirection: "row",
-        justifyContent: "space-between"
-    },
-    buttons: {
-        justifyContent: "space-evenly",
-        flexDirection: "row",
-    },
-    color1: {
-        marginHorizontal: 10,
-        width: 80,
-        height: 30,
-        borderRadius: 30,
-        padding: 10,
-    },
-    footer: {
-        marginTop: 15,
-        // paddingHorizontal: 20,
-        borderRadius: 30,
-        borderWidth: 1,
-        borderColor: '#5D4242',
-        width: 200,
-        alignSelf: 'center',
-        alignItems: 'center'
-    },
-    savetext: {
-        fontSize: 18,
-        fontWeight: "bold",
-        paddingHorizontal: 20,
-        padding: 8,
-        color: '#5D4242',
-        alignSelf: "center"
-    }
-    // ..................,............................
-});
+        backgroundcolor: {
+            marginTop: 10,
+            paddingLeft: 20,
+            flexDirection: "row",
+            justifyContent: "space-between"
+        },
+        buttons: {
+            justifyContent: "space-evenly",
+            flexDirection: "row",
+            flex: 1
+        },
+        color1: {
+            marginHorizontal: 2,
+            width: 60,
+            height: 30,
+            borderRadius: 30,
+            padding: 10,
+            elevation: 3
+        },
+        footer: {
+            marginTop: 15,
+            // paddingHorizontal: 20,
+            borderRadius: 30,
+            borderWidth: 1,
+            borderColor: appPrimaryColor,
+            width: 200,
+            alignSelf: 'center',
+            alignItems: 'center'
+        },
+        savetext: {
+            fontSize: 18,
+            fontFamily: appFontFamily,
+            fontWeight: "bold",
+            paddingHorizontal: 20,
+            padding: 8,
+            color: appPrimaryColor,
+            alignSelf: "center"
+        }
+        // ..................,............................
+    })
+};
 

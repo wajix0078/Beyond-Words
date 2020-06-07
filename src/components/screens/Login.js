@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Container, Icon } from 'native-base'
 import { showMessage } from 'react-native-flash-message';
+import { connect } from 'react-redux';
 import Button from './..//shared/Button';
 import validateForm from './../../helpers/validation';
 import Wrapper, { AuthWrapper } from './Wrapper';
@@ -19,8 +20,19 @@ import firebase from './../../lib/firebase';
 import { signInApp } from '../../auth';
 import ThemeColors from './../../styles/colors'
 import AppConstants from './../../helpers/constants'
+import { getAppConfig } from '../../lib/appConfig';
 
-export default class Login extends Component {
+mapStateToProps = (state) => {
+  const { auth } = state;
+  return { auth }
+}
+
+mapDispatchToProps = (dispatch) => {
+  return {
+    onSignIn: (user) => { dispatch(signIn(user)) }
+  }
+}
+class Login extends Component {
   static navigationOptions = {
     header: null,
   };
@@ -54,6 +66,7 @@ export default class Login extends Component {
   }
 
   render() {
+    const styles = createStyles();
     return (
       <Wrapper isLoading={this.state.isLoading} contentContainerStyle={styles.container}>
         <View style={{ width: '100%', paddingHorizontal: 30 }}>
@@ -66,7 +79,7 @@ export default class Login extends Component {
             placeholder="Email Address"
             keyboardType='email-address'
             autoCapitalize='none'
-            placeholderTextColor={ThemeColors.primaryColorRgba + '0.5)'}
+            placeholderTextColor={getAppConfig().appPrimaryColor}
             value={this.state.email}
             blurOnSubmit={false}
             onSubmitEditing={() => this.passwordInput.focus()}
@@ -79,7 +92,7 @@ export default class Login extends Component {
             style={styles.textinput}
             placeholder="Password"
             returnKeyType="go"
-            placeholderTextColor={ThemeColors.primaryColorRgba + '0.5)'}
+            placeholderTextColor={getAppConfig().appPrimaryColor}
             secureTextEntry
             value={this.state.password}
             ref={(input) => { this.passwordInput = input; }}
@@ -103,9 +116,13 @@ export default class Login extends Component {
     )
   }
 }
-const styles = StyleSheet.create({
+export default connect(mapStateToProps, mapDispatchToProps)(Login);
+const createStyles = () => {
+  let config = getAppConfig()
+  let { appFontFamily, appFontSize, appImageSize, appLanguage, appPrimaryColor, appSecondaryColor } = config
+  return StyleSheet.create({
   container: {
-    backgroundColor: ThemeColors.backgroundColor,
+    backgroundColor: appSecondaryColor,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -115,13 +132,13 @@ const styles = StyleSheet.create({
   },
   emptyView: { height: 30 },
   header: {
-    backgroundColor: ThemeColors.primaryColor,
+    backgroundColor: appPrimaryColor,
     width: AppConstants.screenWidth - 30,
     height: AppConstants.screenHeight / 3,
     resizeMode: 'center',
     borderRadius: 60, overflow: 'hidden'
   },
-  pageHeading: { color: ThemeColors.primaryColor, marginTop: 15, fontSize: 25, fontWeight: 'bold', textAlign: 'center' },
+  pageHeading: { color: appPrimaryColor, marginTop: 15, fontSize: 25, fontWeight: 'bold', textAlign: 'center' },
   content: {
     borderRadius: 60, overflow: 'hidden',
     backgroundColor: ThemeColors.secondaryColorRgba + '0.5)',
@@ -131,7 +148,7 @@ const styles = StyleSheet.create({
 
   textInputContainer: {
     borderWidth: 2,
-    borderColor: ThemeColors.primaryColor,
+    borderColor: appPrimaryColor,
     marginTop: 15,
     width: AppConstants.screenWidth - 60,
     height: 60,
@@ -139,29 +156,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: ThemeColors.backgroundColor,
+    backgroundColor: appSecondaryColor,
     paddingHorizontal: 15
   },
   textinput: {
     flex: 1,
     backgroundColor: 'transparent',
     paddingHorizontal: 5,
-    fontSize: 25,
+    fontSize: 25*appFontSize,
+    fontFamily: appFontFamily,
     fontWeight: 'bold',
-    color: ThemeColors.primaryColor,
+    color: appPrimaryColor,
   },
   icon: {
-    color: ThemeColors.primaryColor,
+    color: appPrimaryColor,
     paddingHorizontal: 10,
-    fontSize: 30,
+    fontSize: 30*appFontSize,
+    fontFamily: appFontFamily,
     width: 40
   },
   submitButtonContainer: {
     marginTop: 15,
   },
   submitButtonText: {
-    color: ThemeColors.backgroundColor,
-    fontSize: 25,
+    color: appSecondaryColor,
+    fontSize: 25*appFontSize,
+    fontFamily: appFontFamily,
     fontWeight: 'bold'
   },
   submitButton: {
@@ -170,7 +190,7 @@ const styles = StyleSheet.create({
     height: 40,
     padding: 0,
     justifyContent: 'center',
-    backgroundColor: ThemeColors.secondaryColor
+    backgroundColor: appPrimaryColor
   },
   linksContainer: {
     marginTop: 15
@@ -180,7 +200,7 @@ const styles = StyleSheet.create({
     padding: 5
   },
   linksText: {
-    color: ThemeColors.primaryColor,
+    color: appPrimaryColor,
   }
 })
 
@@ -242,4 +262,5 @@ const styles = StyleSheet.create({
   signUpButton: {
     marginBottom: 10,
   },
-}); */}
+}); */}}
+

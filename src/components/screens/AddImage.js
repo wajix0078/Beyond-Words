@@ -1,21 +1,16 @@
 import React, { Component } from "react";
+import { connect } from 'react-redux';
 import {
     Dimensions,
     StyleSheet,
     Text,
     View,
-    ImageBackground,
     Image,
     TouchableOpacity,
-    ScrollView,
     TextInput
 } from "react-native";
 import {
-    Container,
-    Header,
-    Content,
     Icon,
-    Accordion,
     Picker
 } from "native-base";
 import Wrapper from "./Wrapper";
@@ -25,10 +20,20 @@ const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
+import { getAppConfig } from "../../lib/appConfig";
+import {t} from 'i18n-js'
 
-const colors = ['#FADAFF', '#ECB184', '#FFFFFF'];
+mapStateToProps = (state) => {
+    const { auth } = state;
+    return { auth }
+}
 
-export default class AddImage extends Component {
+mapDispatchToProps = (dispatch) => {
+    return {
+        onSignIn: (user) => { dispatch(signIn(user)) }
+    }
+}
+class AddImage extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -151,6 +156,7 @@ export default class AddImage extends Component {
     render() {
         const { isLoading, imageData, categoriesList, flowType } = this.state;
         const { name, url, categoryID, partofSpeech, symbolSetType } = imageData
+        const styles = createStyles();
 
         return (
             <Wrapper isLoading={isLoading} contentContainerStyle={styles.fullscreen}>
@@ -158,7 +164,7 @@ export default class AddImage extends Component {
                     <Icon style={styles.backIcon} name='md-arrow-back' type='Ionicons' />
                 </TouchableOpacity>
                 <View style={styles.header}>
-                    <Text style={styles.xLarge}>ADD IMAGE</Text>
+                    <Text style={styles.xLarge}>{t('add_image')}</Text>
                 </View>
 
                 {/* .............................................................. */}
@@ -186,7 +192,7 @@ export default class AddImage extends Component {
                             <View style={styles.pickerContainer}>
                                 <TextInput
                                     style={styles.TextInput}
-                                    placeholderTextColor={'#C38060'}
+                                    placeholderTextColor={getAppConfig().appPrimaryColor}
                                     placeholder={'Enter name...'}
                                     value={name}
                                     onChangeText={this.onValueChange('name')}
@@ -265,173 +271,189 @@ export default class AddImage extends Component {
         );
     }
 }
-const styles = StyleSheet.create({
-    imageContainer: {
-        width: 100,
-        height: 100,
-        borderWidth: 2,
-        borderColor: '#5D4242',
-        borderRadius: 15,
-        alignSelf: 'center',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    browseText: {
-        color: '#5D4242',
-        textAlign: 'center'
-    },
-    backIconContainer: {
-        marginTop: 25,
-        marginLeft: 25,
-        width: 50,
-        height: 30,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2,
-        borderColor: '#5D4242',
-        borderRadius: 15,
-    },
-    backIcon: {
-    },
-    fullscreen: {
-        paddingRight: 0,
-        backgroundColor: "#ECB184",
-        height: height,
-        width: width
-    },
-    lefticon: {
-        width: 40,
-        marginTop: 7,
-        marginLeft: 7,
-        paddingHorizontal: 3,
-        borderRadius: 50,
-        borderWidth: 1
-    },
-    header: {
-        backgroundColor: "#5D4242",
-        paddingHorizontal: 35,
-        padding: 20,
-        borderRadius: 50,
-        alignSelf: "center",
-        marginTop: 10
-    },
+export default connect(mapStateToProps, mapDispatchToProps)(AddImage);
+const createStyles = () => {
+    let config = getAppConfig()
+    let { appPrimaryColor, appSecondaryColor,appFontFamily, appFontSize } = config
+    return StyleSheet.create({
+        imageContainer: {
+            width: 100,
+            height: 100,
+            borderWidth: 2,
+            borderColor: appPrimaryColor,
+            borderRadius: 15,
+            alignSelf: 'center',
+            alignItems: 'center',
+            justifyContent: 'center'
+        },
+        browseText: {
+            color: appPrimaryColor,
+            textAlign: 'center'
+        },
+        backIconContainer: {
+            marginTop: 25,
+            marginLeft: 25,
+            width: 50,
+            height: 30,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 2,
+            borderColor: appPrimaryColor,
+            borderRadius: 15,
+        },
+        backIcon: {
+        },
+        fullscreen: {
+            paddingRight: 0,
+            backgroundColor: appSecondaryColor,
+            height: height,
+            width: width
+        },
+        lefticon: {
+            width: 40,
+            marginTop: 7,
+            marginLeft: 7,
+            paddingHorizontal: 3,
+            borderRadius: 50,
+            borderWidth: 1
+        },
+        header: {
+            backgroundColor: appPrimaryColor,
+            paddingHorizontal: 35,
+            padding: 20,
+            borderRadius: 50,
+            alignSelf: "center",
+            marginTop: 10
+        },
 
-    textSmall: {
-        fontSize: 11
-    },
-    textBold: {
-        fontSize: 15,
-        fontWeight: "bold"
-    },
-    textMedium: {
-        fontSize: 15,
-        color: "grey"
-    },
-    textLarge: {
-        fontFamily: "normal",
-        fontSize: 30,
-        fontWeight: "bold"
-    },
-    xLarge: {
-        fontSize: 45,
-        fontWeight: "bold",
-        justifyContent: "center",
-        alignSelf: "center",
-        color: "#ECB184"
-    },
-    TextInput: { paddingHorizontal: 10 },
+        textSmall: {
+            fontSize: 11*appFontSize,
+            fontFamily: appFontFamily,
+    
+        },
+        textBold: {
+            fontSize: 15*appFontSize,
+            fontFamily: appFontFamily,
+            fontWeight: "bold"
+        },
+        textMedium: {
+            fontSize: 15*appFontSize,
+            fontFamily: appFontFamily,
+            color: "grey"
+        },
+        textLarge: {
+            fontFamily: "normal",
+            fontSize: 30*appFontSize,
+            fontWeight: "bold"
+        },
+        xLarge: {
+            fontSize: 45*appFontSize,
+            fontFamily: appFontFamily,
+            fontWeight: "bold",
+            justifyContent: "center",
+            alignSelf: "center",
+            color: appSecondaryColor
+        },
+        TextInput: { paddingHorizontal: 10 },
 
-    // .............................................
+        // .............................................
 
-    bodystyle: {
-        flex: 1,
-        marginRight: 2
-    },
-    innerbodystyle: {
-        paddingHorizontal: 20,
-        paddingRight: 50,
-        marginTop: 10,
-        flexDirection: "column"
-    },
-    settings: {
-        marginTop: 15,
-        marginBottom: 15,
-        flexDirection: "row",
-        justifyContent: "space-between"
-    },
-    labelContainer: {
-        backgroundColor: '#5D4242',
-        borderRadius: 20,
-        justifyContent: 'center'
-    },
-    settingstext: {
-        alignSelf: "center",
-        paddingHorizontal: 10,
-        // backgroundColor: "#5D4242",
-        color: '#ECB184',
-        padding: 3,
-        borderRadius: 10,
-        fontWeight: "bold"
-    },
-    pickerContainer: {
-        width: 125,
-        borderColor: '#5D4242',
-        borderRadius: 20,
-        borderWidth: 2,
-        height: 30,
-        justifyContent: 'center'
-    },
-    pickerText: {
-        color: '#5D4242',
-    },
-    caret: {
-        marginLeft: 0,
-        fontSize: 14,
-        color: '#5D4242'
-    },
-    isActive: {
-        borderColor: '#5D4242',
-        borderRadius: 20,
-        borderWidth: 2,
-    },
+        bodystyle: {
+            flex: 1,
+            marginRight: 2
+        },
+        innerbodystyle: {
+            paddingHorizontal: 20,
+            paddingRight: 50,
+            marginTop: 10,
+            flexDirection: "column"
+        },
+        settings: {
+            marginTop: 15,
+            marginBottom: 15,
+            flexDirection: "row",
+            justifyContent: "space-between"
+        },
+        labelContainer: {
+            backgroundColor: appPrimaryColor,
+            borderRadius: 20,
+            justifyContent: 'center'
+        },
+        settingstext: {
+            alignSelf: "center",
+            paddingHorizontal: 10,
+            // backgroundColor: appPrimaryColor,
+            color: appSecondaryColor,
+            padding: 3,
+            fontSize:12*appFontSize,
+            fontFamily:appFontFamily,
+            borderRadius: 10,
+            fontWeight: "bold"
+        },
+        pickerContainer: {
+            width: 125,
+            borderColor: appPrimaryColor,
+            borderRadius: 20,
+            borderWidth: 2,
+            height: 30,
+            justifyContent: 'center'
+        },
+        pickerText: {
+            color: appPrimaryColor,
+            fontFamily:appFontFamily
+        },
+        caret: {
+            marginLeft: 0,
+            fontSize: 14*appFontSize,
+            fontFamily: appFontFamily,
+            color: appPrimaryColor
+        },
+        isActive: {
+            borderColor: appPrimaryColor,
+            borderRadius: 20,
+            borderWidth: 2,
+        },
 
-    // ...........................................
+        // ...........................................
 
-    backgroundcolor: {
-        marginTop: 10,
-        paddingLeft: 20,
-        flexDirection: "row",
-        justifyContent: "space-between"
-    },
-    buttons: {
-        justifyContent: "space-evenly",
-        flexDirection: "row",
-    },
-    color1: {
-        marginHorizontal: 10,
-        width: 80,
-        height: 30,
-        borderRadius: 30,
-        padding: 10,
-    },
-    footer: {
-        marginTop: 15,
-        // paddingHorizontal: 20,
-        borderRadius: 30,
-        borderWidth: 1,
-        borderColor: '#5D4242',
-        width: 200,
-        alignSelf: 'center',
-        alignItems: 'center'
-    },
-    savetext: {
-        fontSize: 18,
-        fontWeight: "bold",
-        paddingHorizontal: 20,
-        padding: 8,
-        color: '#5D4242',
-        alignSelf: "center"
-    }
-    // ..................,............................
-});
+        backgroundcolor: {
+            marginTop: 10,
+            paddingLeft: 20,
+            flexDirection: "row",
+            justifyContent: "space-between"
+        },
+        buttons: {
+            justifyContent: "space-evenly",
+            flexDirection: "row",
+        },
+        color1: {
+            marginHorizontal: 10,
+            width: 80,
+            height: 30,
+            borderRadius: 30,
+            padding: 10,
+        },
+        footer: {
+            marginTop: 15,
+            // paddingHorizontal: 20,
+            borderRadius: 30,
+            borderWidth: 1,
+            borderColor: appPrimaryColor,
+            width: 200,
+            alignSelf: 'center',
+            alignItems: 'center'
+        },
+        savetext: {
+            fontSize: 18*appFontSize,
+            fontFamily: appFontFamily,
+            fontWeight: "bold",
+            paddingHorizontal: 20,
+            padding: 8,
+            color: appPrimaryColor,
+            alignSelf: "center"
+        }
+        // ..................,............................
+    })
+}
+    ;
 

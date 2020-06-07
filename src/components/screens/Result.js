@@ -12,13 +12,25 @@ import {
     ImageBackground,
 } from 'react-native';
 import { TransparentButton } from '../shared';
+import { connect } from 'react-redux';
 import api from '../../api';
 import Wrapper from './Wrapper';
 import { Icon } from 'native-base';
+import { getAppConfig } from '../../lib/appConfig';
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
- 
-export default class Result extends Component {
+
+mapStateToProps = (state) => {
+    const { auth } = state;
+    return { auth }
+  }
+  
+  mapDispatchToProps = (dispatch) => {
+    return {
+      onSignIn: (user) => { dispatch(signIn(user)) }
+    }
+  }
+class Result extends Component {
 
     constructor(props) {
         super(props);
@@ -38,6 +50,7 @@ export default class Result extends Component {
     handleMainMenuPress = () => this.props.navigation.popToTop()
     render() {
         const { imagesList, } = this.state;
+        const styles = createStyles();
 
         return (
             <Wrapper contentContainerStyle={styles.outerContainer}>
@@ -78,6 +91,7 @@ export default class Result extends Component {
         );
     }
     _renderImages = ({ item }) => {
+        const styles = createStyles();
         return (
             <View>
                 <Image style={styles.itemImage} source={{ uri: item?.url }} />
@@ -85,10 +99,13 @@ export default class Result extends Component {
         )
     }
 }
-
-const styles = StyleSheet.create({
+export default connect(mapStateToProps, mapDispatchToProps)(Result);
+const createStyles = () => {
+    let config = getAppConfig()
+    let { appFontFamily, appFontSize, appImageSize, appLanguage, appPrimaryColor, appSecondaryColor } = config
+    return StyleSheet.create({
     speakerIcon: {
-        color: '#ECB184', fontSize: 40,
+        color: appSecondaryColor, fontSize: 40*appFontSize, fontFamily: appFontFamily,
     },
     outerContainer: {
         flex: 1
@@ -107,13 +124,14 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     sentHeading: {
-        fontSize: 20,
+        fontSize: 20*appFontSize,
+        fontFamily: appFontFamily,
         fontWeight: 'bold',
         textAlign: 'center',
-        color: '#5D4242',
+        color: appPrimaryColor,
     },
     sentContainer: {
-        backgroundColor: '#5D4242',
+        backgroundColor: appPrimaryColor,
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
@@ -123,11 +141,12 @@ const styles = StyleSheet.create({
         borderRadius: 70
     },
     sent: {
-        fontSize: 25,
-        color: '#ECB184'
+        fontSize: 25*appFontSize,
+        fontFamily: appFontFamily,
+        color: appSecondaryColor
     },
     flatlistStyles: {
-        backgroundColor: '#5D4242',
+        backgroundColor: appPrimaryColor,
     },
     imageListContainer: {
         paddingHorizontal: 5,
@@ -139,7 +158,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         marginHorizontal: 5,
         overflow: 'hidden',
-        borderColor: '#ECB184',
+        borderColor: appSecondaryColor,
         borderWidth: 3,
     },
     buttonsContainer: {
@@ -154,14 +173,15 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         borderWidth: 0,
         marginVertical: 20,
-        backgroundColor: '#5D4242',
+        backgroundColor: appPrimaryColor,
         marginHorizontal: 20,
         padding: 25,
     },
     headertext: {
-        color: '#ECB184',
+        color: appSecondaryColor,
         fontWeight: 'bold',
-        fontSize: 40,
+        fontSize: 40*appFontSize,
+        fontFamily: appFontFamily,
         textAlign: 'center',
     },
-});
+})};

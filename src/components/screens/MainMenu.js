@@ -19,7 +19,8 @@ import { LottieAnimation, Row } from './../shared'
 import { Icon } from 'native-base';
 const { width, height } = Dimensions.get('window')
 import ThemeColors from './../../styles/colors'
-
+import { getAppConfig } from '../../lib/appConfig';
+import { withNavigationFocus } from 'react-navigation';
 mapStateToProps = (state) => {
   const { auth } = state;
   return { auth }
@@ -53,14 +54,20 @@ class MainMenu extends Component {
     // const { isUserProfileLoaded } = this.state;
     // if (!isUserProfileLoaded) {
     //   return <Wrapper isLoading />
-    // }
-    console.log(this.props.auth)
+    // } 
+    const styles = createStyles();
+    if (!this.props.isFocused) {
+      return <Wrapper />
+    }
     return (
       <Wrapper>
         <View style={styles.container}>
           <StatusBar barStyle="light-content" backgroundColor="#00796B" />
           <View style={styles.imageContainer}>
-            <Image resizeMode='contain' style={styles.imageStyles} source={require('./../../../assets/images/beyondWords.png')} />
+            <Image
+              resizeMode='contain'
+              style={styles.imageStyles}
+              source={require('./../../../assets/images/beyondWords.png')} />
           </View>
           <View style={styles.row}>
             <RoundButton
@@ -117,42 +124,62 @@ class MainMenu extends Component {
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(MainMenu);
+export default withNavigationFocus(connect(mapStateToProps, mapDispatchToProps)(MainMenu));
 
-const styles = StyleSheet.create({
-  imageContainer: {
-    alignItems: 'center',
-    marginBottom: 20
-  },
-  imageStyles: {
-    width: width * 83 / 100,
-  },
-  container: {
-    flex: 1,
-    paddingTop: 40,
-  },
-  iconTitleSet: {
-    marginBottom: 20,
-  },
-  RoundButton: {
-    marginBottom: 10,
-    width: width * 44.97 / 100,
-    height: width * 44.97 / 100
-  },
-  buttonText: { fontSize: 25, fontWeight: 'bold' },
-  roundButtonInnerView: {
-    borderColor: ThemeColors.backgroundColor, borderWidth: 2, borderRadius: 100,
-    width: width * 44.97 / 100 - 5,
-    height: width * 44.97 / 100 - 5,
-    justifyContent: 'center'
-  },
-  welcomeText: { color: 'white', fontSize: 20, textAlign: 'center', flex: 1, },
-  nameText: { color: 'white', fontSize: 20, paddingHorizontal: 5 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly'
-  }
-});
+const createStyles = () => {
+  let config = getAppConfig()
+  let { appFontFamily, appFontSize, appImageSize, appLanguage, appPrimaryColor, appSecondaryColor } = config
+  return StyleSheet.create({
+    imageContainer: {
+      alignItems: 'center',
+      marginBottom: 20
+    },
+    imageStyles: {
+      width: width * 83 / 100,
+      height: width * 35 / 100,
+      tintColor:appPrimaryColor
+    },
+    container: {
+      flex: 1,
+      paddingVertical: 40,
+    },
+    iconTitleSet: {
+      marginBottom: 20,
+    },
+    RoundButton: {
+      marginBottom: 10,
+      width: width * 44.97 / 100,
+      height: width * 44.97 / 100
+    },
+    buttonText: {
+      fontSize: 25 * appFontSize,
+      fontWeight: 'bold',
+      fontFamily: appFontFamily,
+    },
+    roundButtonInnerView: {
+      borderColor: appSecondaryColor,
+      borderWidth: 2, borderRadius: 100,
+      width: width * 44.97 / 100 - 5,
+      height: width * 44.97 / 100 - 5,
+      justifyContent: 'center'
+    },
+    welcomeText: {
+      color: 'white', fontSize: 20 * appFontSize,
+      textAlign: 'center',
+      flex: 1,
+      fontFamily: appFontFamily,
+    },
+    nameText: {
+      color: 'white', fontSize: 20 * appFontSize,
+      paddingHorizontal: 5,
+      fontFamily: appFontFamily,
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-evenly'
+    }
+  })
+};
 
 
 

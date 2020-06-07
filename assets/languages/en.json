@@ -1,0 +1,24 @@
+{
+    "setting": "SETTINGS",
+    "picture_size":"PICTURE SIZE",
+    "f_size":"FONT SIZE",
+    "lang":"LANGUAGE",
+    "f_type": "FONT TYPE",
+    "BACKGROUND":"BACKGROUND",
+    "save_changes":"SAVE CHANGES",
+    "P_small":"Small",
+    "P_medium":"Medium",
+    "P_large":"Large",
+    "F_small":"Small",
+    "F_medium":"Medium",
+    "F_large":"Large",
+    "eng":"English",
+    "urdu":"Urdu",
+    "add_image":"ADD IMAGE"
+    
+
+
+
+
+
+}

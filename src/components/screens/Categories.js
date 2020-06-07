@@ -12,13 +12,26 @@ import {
     ImageBackground,
 } from 'react-native';
 import { TransparentButton } from '../shared';
+import { connect } from 'react-redux';
 import api from '../../api';
 import Wrapper from './Wrapper';
 import { Icon } from 'native-base';
+import { getAppConfig } from '../../lib/appConfig';
+import { ScrollView } from 'react-native-gesture-handler';
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
-export default class Categories extends Component {
+mapStateToProps = (state) => {
+    const { auth } = state;
+    return { auth }
+}
+
+mapDispatchToProps = (dispatch) => {
+    return {
+        onSignIn: (user) => { dispatch(signIn(user)) }
+    }
+}
+class Categories extends Component {
 
     constructor(props) {
         super(props);
@@ -129,15 +142,21 @@ export default class Categories extends Component {
             isLoading, screenType, selectedImagesListForResults,
             imagesList, categoriesList, selectedImagesForCurrentCategory
         } = this.state;
-
+        const styles = createStyles();
         return (
             <Wrapper isLoading={isLoading} contentContainerStyle={styles.outerContainer}>
                 <View style={styles.flex1}>
                     <View style={styles.container}>
                         <Text style={styles.headertext}>{screenType}</Text>
                     </View>
-                    <View style={styles.flatListContainer}>
-                        <FlatList
+                    <ScrollView contentContainerStyle={styles.flatListContainer}>
+                        {
+                            screenType == 'Categories' ?
+                                categoriesList.map(item => this.categoryImages({ item }))
+                                :
+                                imagesList.map(item => this.categoryImages({ item }))
+                        }
+                        {/* <FlatList
                             extraData={this.state}
                             columnWrapperStyle={styles.columnWrapperStyle}
                             style={styles.catContainer}
@@ -146,8 +165,8 @@ export default class Categories extends Component {
                             data={screenType == 'Categories' ? categoriesList : imagesList}
                             renderItem={this.categoryImages}
                             keyExtractor={(item, ind) => ind}
-                        />
-                    </View>
+                        /> */}
+                    </ScrollView>
                 </View>
 
                 <View style={styles.buttonsContainer}>
@@ -163,6 +182,7 @@ export default class Categories extends Component {
         );
     }
     categoryImages = ({ item }) => {
+        const styles = createStyles();
         const { screenType, selectedImagesForCurrentCategory } = this.state
         return (
             <>
@@ -178,107 +198,118 @@ export default class Categories extends Component {
         );
     }
 }
+export default connect(mapStateToProps, mapDispatchToProps)(Categories);
+const createStyles = () => {
+    let config = getAppConfig()
+    let { appFontFamily, appFontSize, appImageSize, appLanguage, appPrimaryColor, appSecondaryColor } = config
+    return StyleSheet.create({
+        iconContainer: {
+            borderRadius: 100, borderWidth: 0
+        },
+        checkIcon: {
+            color: appPrimaryColor, fontSize: 40,
+            position: 'absolute', right: -10, bottom: 10,
+        },
+        flex1: { flex: 1 },
+        columnWrapperStyle: {
+            justifyContent: 'space-between'
+        },
+        buttonsContainer: {
+            flexDirection: 'row',
+            alignSelf: 'center',
+            justifyContent: 'space-evenly',
+            marginHorizontal: 40,
+            marginVertical: 20,
+        },
+        outerContainer: {
+            flex: 1,
+            backgroundColor: appSecondaryColor
+        },
+        container: {
+            justifyContent: 'space-evenly',
+            borderRadius: 25,
+            borderWidth: 0,
+            marginTop: 20,
+            backgroundColor: appPrimaryColor,
+            marginHorizontal: 20,
+            padding: 25,
+        },
+        emptySpace: {
+            height: 6,
+        },
+        item: {
+            marginTop: 10,
+            alignItems: 'center',
+        },
+        textFonts: {
+            borderRadius: 25,
+            color: appPrimaryColor,
+            fontWeight: 'bold',
+            fontSize: 25* appFontSize,
+            fontFamily: appFontFamily,
+            textAlign: 'center',
+            borderColor: appPrimaryColor,
+            borderWidth: 3,
+            width: (34 / 100) * width,
+            padding: 15,
+            marginHorizontal: 10,
+            paddingVertical: 25,
+        },
+        catItemImage: {
+            width: ((34 / 100) * width) * appImageSize,
+            height: ((34 / 100) * width) * appImageSize,
+            borderRadius: 25,
+            overflow: 'hidden',
+            borderColor: appPrimaryColor,
+            borderWidth: 3,
+        },
+        headertext: {
+            color: appSecondaryColor,
+            fontWeight: 'bold',
+            fontSize: 40* appFontSize,
+            fontFamily: appFontFamily,
+            textAlign: 'center',
+        },
+        flatListContainer: {
+            flexGrow: 1,
+            flexWrap: "wrap",
+            // flex: 1,
+            paddingTop: 5,
+            flexDirection: 'row',
+            justifyContent: 'space-evenly',
+            borderBottomWidth: 1,
+            borderBottomLeftRadius: 25,
+            borderBottomRightRadius: 25,
+            borderColor: appPrimaryColor,
+            borderWidth: 3 / 2,
+            marginTop: -6,
+            marginHorizontal: 30,
+            overflow: 'hidden'
+        },
+        catContainer: {
+            // backgroundColor: 'yellow',
 
-const styles = StyleSheet.create({
-    iconContainer: {
-        borderRadius: 100, borderWidth: 0
-    },
-    checkIcon: {
-        color: '#5D4242', fontSize: 40,
-        position: 'absolute', right: -10, bottom: 10,
-    },
-    flex1: { flex: 1 },
-    columnWrapperStyle: {
-        justifyContent: 'space-between'
-    },
-    buttonsContainer: {
-        flexDirection: 'row',
-        alignSelf: 'center',
-        justifyContent: 'space-evenly',
-        marginHorizontal: 40,
-        marginVertical: 20,
-    },
-    outerContainer: {
-        flex: 1,
-        backgroundColor: '#ECB184'
-    },
-    container: {
-        justifyContent: 'space-evenly',
-        borderRadius: 25,
-        borderWidth: 0,
-        marginTop: 20,
-        backgroundColor: '#5D4242',
-        marginHorizontal: 20,
-        padding: 25,
-    },
-    emptySpace: {
-        height: 6,
-    },
-    item: {
-        marginTop: 10,
-    },
-    textFonts: {
-        borderRadius: 25,
-        color: '#e67300',
-        fontWeight: 'bold',
-        fontSize: 25,
-        textAlign: 'center',
-        borderColor: '#5D4242',
-        borderWidth: 3,
-        width: (34 / 100) * width,
-        padding: 15,
-        marginHorizontal: 10,
-        paddingVertical: 25,
-    },
-    catItemImage: {
-        width: (34 / 100) * width,
-        height: (34 / 100) * width,
-        borderRadius: 25,
-        overflow: 'hidden',
-        borderColor: '#5D4242',
-        borderWidth: 3,
-    },
-    headertext: {
-        color: '#ECB184',
-        fontWeight: 'bold',
-        fontSize: 40,
-        textAlign: 'center',
-    },
-    flatListContainer: {
-        flex: 1,
-        paddingTop: 5,
-        borderBottomWidth: 1,
-        borderBottomLeftRadius: 25,
-        borderBottomRightRadius: 25,
-        borderColor: '#5D4242',
-        borderWidth: 3 / 2,
-        marginTop: -6,
-        marginHorizontal: 30,
-        overflow: 'hidden'
-    },
-    catContainer: {
-        // backgroundColor: 'yellow',
+        },
+        categoryImages: {
+            // height: (65 / 100) * height,
+            // justifyContent: 'space-evenly',
 
-    },
-    categoryImages: {
-        // height: (65 / 100) * height,
-        // justifyContent: 'space-evenly',
-
-        // alignSelf: 'center',
-        // backgroundColor: 'red', 
-        paddingHorizontal: 10,
-        borderTopLeftRadius: 0,
-        borderTopRightRadius: 0,
-        borderTopWidth: 0,
-    },
-    categoryLabels: {
-        color: '#5D4242',
-        textAlign: 'center',
-        marginBottom: 10,
-        width: (28 / 100) * width,
-        borderRadius: 10,
-        alignSelf: 'center',
-        marginTop: 3,
-        fontWeight: 'bold',
-    },
-});
+            // alignSelf: 'center',
+            // backgroundColor: 'red', 
+            paddingHorizontal: 10,
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            borderTopWidth: 0,
+        },
+        categoryLabels: {
+            color: appPrimaryColor,
+            textAlign: 'center',
+            marginBottom: 10,
+            width: (28 / 100) * width,
+            borderRadius: 10,
+            alignSelf: 'center',
+            marginTop: 3,
+            fontWeight: 'bold',
+        },
+    })
+};

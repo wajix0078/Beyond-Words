@@ -7,8 +7,10 @@ import { Content } from 'native-base'
 import Spinner from 'react-native-loading-spinner-overlay';
 import ThemeColors from './../../styles/colors'
 import AppConstants from './../../helpers/constants'
+import { getAppConfig } from '../../lib/appConfig';
 export default Wrapper = (props) => {
   const { style = {}, children, isLoading = false, contentContainerStyle = {} } = props;
+  const styles = createStyles();
   return (
     <Content contentContainerStyle={contentContainerStyle} style={[styles.container, style]}>
       {/* <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' >
@@ -23,6 +25,7 @@ export default Wrapper = (props) => {
 }
 export const AuthWrapper = (props) => {
   const { style = {}, children, isLoading = false, contentContainerStyle = {} } = props;
+  const styles = createStyles();
   return (
     <Content contentContainerStyle={styles.ImageBackgroundStyle} >
       <StatusBar barStyle="light-content" backgroundColor="#16a085" />
@@ -48,72 +51,76 @@ export const AuthWrapper = (props) => {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: ThemeColors.backgroundColor,
-    paddingTop: 30
-  },
-  ImageBackgroundStyle: {
-    flex: 1,
-    width: AppConstants.screenWidth,
-    height: AppConstants.screenHeight,
-    alignItems: 'center',
-  },
-  emptyView: { height: 30 },
-  header: {
-    backgroundColor: ThemeColors.primaryColor,
-    width: AppConstants.screenWidth - 30,
-    height: AppConstants.screenHeight / 3,
-    // resizeMode: 'center'
-    alignItems: 'center', justifyContent: 'center',
-    borderRadius: 60, overflow: 'hidden'
-  },
-  logoImage: {
-    resizeMode: 'contain',
-    height: (AppConstants.screenHeight / 3) - 70,
-  },
-  content: {
-    // marginTop: 50,
-    borderRadius: 60, overflow: 'hidden',
-    backgroundColor: ThemeColors.secondaryColorRgba + '0.5)',
-    alignItems: 'center',
-    paddingBottom: 50
-  },
+const createStyles = () => {
+  let config = getAppConfig()
+  let { appFontFamily, appFontSize, appImageSize, appLanguage, appPrimaryColor, appSecondaryColor } = config
+  return StyleSheet.create({
+    container: {
+      backgroundColor: appSecondaryColor,
+      paddingTop: 30
+    },
+    ImageBackgroundStyle: {
+      flex: 1,
+      width: AppConstants.screenWidth,
+      height: AppConstants.screenHeight,
+      alignItems: 'center',
+    },
+    emptyView: { height: 30 },
+    header: {
+      backgroundColor: appPrimaryColor,
+      width: AppConstants.screenWidth - 30,
+      height: AppConstants.screenHeight / 3,
+      // resizeMode: 'center'
+      alignItems: 'center', justifyContent: 'center',
+      borderRadius: 60, overflow: 'hidden'
+    },
+    logoImage: {
+      resizeMode: 'contain',
+      height: (AppConstants.screenHeight / 3) - 70,
+    },
+    content: {
+      // marginTop: 50,
+      borderRadius: 60, overflow: 'hidden',
+      backgroundColor: ThemeColors.secondaryColorRgba + '0.5)',
+      alignItems: 'center',
+      paddingBottom: 50
+    },
 
-  textInputContainer: {
-    marginTop: 15,
-    width: AppConstants.screenWidth - 60,
-    height: 40,
-    borderRadius: 60,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 15
-  },
-  textinput: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  icon: {
-    paddingHorizontal: 10,
-  },
-  submitButtonContainer: {
-    marginTop: 15
-  },
-  submitButton: {
-    width: AppConstants.screenWidth - 30,
-    borderRadius: 60,
-    backgroundColor: ThemeColors.secondaryColor
-  },
-  linksContainer: {
-    marginTop: 15
-  },
-  links: {
-    backgroundColor: 'transparent',
-    padding: 5
-  },
-  linksText: {
-    color: ThemeColors.primaryColor,
-  }
-}); 
+    textInputContainer: {
+      marginTop: 15,
+      width: AppConstants.screenWidth - 60,
+      height: 40,
+      borderRadius: 60,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#fff',
+      paddingHorizontal: 15
+    },
+    textinput: {
+      flex: 1,
+      backgroundColor: 'transparent',
+    },
+    icon: {
+      paddingHorizontal: 10,
+    },
+    submitButtonContainer: {
+      marginTop: 15
+    },
+    submitButton: {
+      width: AppConstants.screenWidth - 30,
+      borderRadius: 60,
+      backgroundColor: appSecondaryColor
+    },
+    linksContainer: {
+      marginTop: 15
+    },
+    links: {
+      backgroundColor: 'transparent',
+      padding: 5
+    },
+    linksText: {
+      color: appPrimaryColor,
+    }
+  })
+}; 

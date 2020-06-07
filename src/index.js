@@ -6,6 +6,13 @@ import { isSignedIn } from './auth';
 import { Provider } from 'react-redux';
 import { store } from './redux'
 import Wrapper from './components/screens/Wrapper';
+import { setAppConfig, getAppConfig, getAppLocalConfig } from './lib/appConfig'
+import en from '../assets/languages/en.json'
+import i18n from 'i18n-js'
+i18n.locale = "en";
+i18n.translations = {
+  en
+}
 // Don't show message that debugger will make app load slower
 console.ignoredYellowBox = ['Remote debugger'];
 console.disableYellowBox = true;
@@ -18,7 +25,12 @@ export default class App extends React.Component {
       checkedSignIn: false,
     };
   }
-  componentDidMount() {
+  async componentDidMount() {
+    try {
+      await getAppLocalConfig()
+    } catch (error) {
+      console.log('setAppConfig() error:', error)
+    }
     isSignedIn()
       .then(async (response) => {
         console.log('response>>>>', response)

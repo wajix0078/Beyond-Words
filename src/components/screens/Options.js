@@ -20,6 +20,7 @@ import { LottieAnimation, Row } from './../shared'
 import { Icon } from 'native-base';
 const { width, height } = Dimensions.get('window')
 import ThemeColors from './../../styles/colors'
+import { getAppConfig } from '../../lib/appConfig';
 
 mapStateToProps = (state) => {
     const { auth } = state;
@@ -40,6 +41,7 @@ class Options extends Component {
         }
     }
     render() {
+        const styles = createStyles();
         return (
             <Wrapper contentContainerStyle={styles.container}>
                 <TouchableOpacity onPress={() => this.props.navigation.goBack()} style={styles.backIconContainer}>
@@ -67,7 +69,10 @@ class Options extends Component {
 
 export default connect(mapStateToProps, mapDispatchToProps)(Options);
 
-const styles = StyleSheet.create({
+const createStyles = () => {
+    let config = getAppConfig()
+    let { appFontFamily, appFontSize, appImageSize, appLanguage, appPrimaryColor, appSecondaryColor } = config
+    return StyleSheet.create({
     backIconContainer: {
         marginTop: 25,
         marginLeft: 25,
@@ -76,7 +81,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 2,
-        borderColor: '#5D4242',
+        borderColor: appPrimaryColor,
         borderRadius: 15,
     },
     backIcon: {
@@ -93,36 +98,38 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         borderWidth: 0,
         marginTop: 20,
-        backgroundColor: '#5D4242',
+        backgroundColor: appPrimaryColor,
         marginHorizontal: 20,
         padding: 25,
     },
     headerTitle: {
-        color: '#ECB184',
+        color: appSecondaryColor,
         fontWeight: 'bold',
-        fontSize: 40,
+        fontSize: 40*appFontSize,
+        fontFamily: appFontFamily,
         textAlign: 'center',
     },
     button: {
         marginTop: 15,
         borderRadius: 30,
         borderWidth: 1,
-        borderColor: '#5D4242',
+        borderColor: appPrimaryColor,
         width: 200,
         alignSelf: 'center',
         alignItems: 'center',
         justifyContent: 'center'
     },
     buttonText: {
-        fontSize: 18,
+        fontSize: 18*appFontSize,
+        fontFamily: appFontFamily,
         fontWeight: "bold",
         paddingHorizontal: 20,
         paddingVertical: 8,
-        borderColor: '#5D4242',
-        color: '#5D4242',
+        borderColor: appPrimaryColor,
+        color: appPrimaryColor,
         alignSelf: "center"
     }
-});
+})};
 
 
 
