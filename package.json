@@ -22,7 +22,7 @@
     "expo-video-thumbnails": "~4.0.0",
     "firebase": "^6.3.3",
     "i18n-js": "^3.7.0",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.21",
     "lottie-react-native": "~2.6.1",
     "native-base": "^2.13.4",
     "react": "16.9.0",
