@@ -54,7 +54,7 @@
     "redux-thunk": "^2.3.0",
     "rn-placeholder": "^3.0.0-alpha.3",
     "uuid": "^8.1.0",
-    "validator": "^10.6.0"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "babel-preset-expo": "^8.0.0"
